@@ -2,24 +2,27 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Chat with Socket.io</title>
 </head>
 <body style="margin:0px;">
     <h1 style="width:40%;">Socket.io Chat</h1>
     <h2 style="width:40%;">Connected users :</h2>
 
+    
+    <!-- div for user list -->
     <div style="display:flex">
         <div style="width:40%; word-wrap:break-word;" id="listUserDiv">
             <div id="mesUsers">
-
             </div>
         </div>
 
        <!-- <hr style="height:1px; border:0; border-top: 1px solid #ccc;"> -->
 
+    <!-- div for message -->
         <div style="margin-bottom:100px; width:60%; display:inline-block; padding-left:15px;" id="messageDiv">
         </div>
     </div>
+    <!-- div for text input and submit button-->
     <div style="display:flex; position:fixed; width:100%; bottom:0px; left:0px; height:80px;">
         <input style="width:85%; font-size:14px;" type="textarea" id="messageInput">
         <button style="width:15%; background-color:dodgerblue; border:none; color:white; font-size:16px;" id="submitBtn">Submit</button>
@@ -27,24 +30,40 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var socket = io();
+        // Creation of the prompt popup to choose a username
         var user = prompt("Please enter your name", "Anonymous user");
         socket.emit('user', user)
+        // Generation of color for a user
         var color = '#' + (Math.random()*0xFFFFFF<<0).toString(16);
+        // Get different elements on the page
         var messageDiv = document.getElementById('messageDiv');
         var submitBtn = document.getElementById('submitBtn');
         var messageInput = document.getElementById('messageInput');
         var listUserDiv = document.getElementById('listUserDiv');
         
+        // Listener to send message with submit button
         submitBtn.addEventListener('click', ()=> {
            socket.emit('message', {user:user, message:messageInput.value, color:color, id:socket.id});
            messageDiv.innerHTML +=('<p style="color: '+color+'">'+user+" : "+ messageInput.value +'</p>');
            messageInput.value = '';
         });
 
+        // Listener to send message with enter
+        messageInput.addEventListener('keyup', (e)=> {
+            if(e.keyCode === 13){
+                socket.emit('message', {user:user, message:messageInput.value, color:color, id:socket.id});
+                messageDiv.innerHTML +=('<p style="color: '+color+'">'+user+" : "+ messageInput.value +'</p>');
+                messageInput.value = '';
+        }});
+
+
+        // Part to display message of the user
         socket.on('message', (data) => {
             console.log('message received : ', data);
             messageDiv.innerHTML +=('<p style="color: '+data.color+'">'+data.user+" : "+ data.message +'</p>');
         });
+
+        // Generation of the user list 
         socket.on('generateList', (data)=>{
             var newDiv = document.getElementById('mesUsers');
             newDiv.remove();

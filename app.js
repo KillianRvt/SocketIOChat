@@ -2,12 +2,14 @@ const app = require('express')();
 const http  = require('http').Server(app);
 const io = require('socket.io')(http);
 
+// Definition of the application port
 const port = 4096
 
+// Socket initiatlisation
 io.on('connection', socket => {
     console.log('user connected : ', socket.id);
     let allSocketId = Object.keys(io.sockets.clients().connected);
-    console.log(allSocketId);
+    //console.log(allSocketId);
     socket.on('loaded', (data) => {
         console.log('data from client : ', data)
     })
@@ -23,7 +25,7 @@ io.on('connection', socket => {
     io.emit('userList', allSocketId)
     function generateListUser(){
         var userList = [];
-        console.log(userList);
+        //console.log(userList);
         var clientList = io.sockets.clients().connected
         Object.entries(clientList).forEach(element => {
             let pseudo = element[1].pseudo;
@@ -34,8 +36,8 @@ io.on('connection', socket => {
     }
 });
 
+// Route for the chat
 app.get('/', (req, res)=> {
-    //res.send(userList);
     res.sendFile(__dirname + '/views/index.html');
 });
 
